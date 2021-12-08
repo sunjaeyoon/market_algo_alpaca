@@ -1,0 +1,26 @@
+{
+  "name": "market_algo_alpaca",
+  "version": "1.0.0",
+  "description": "my attempt at algo trading using alpaca for market data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunjaeyoon/market_algo_alpaca.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sunjaeyoon/market_algo_alpaca/issues"
+  },
+  "homepage": "https://github.com/sunjaeyoon/market_algo_alpaca#readme",
+  "dependencies": {
+    "@alpacahq/alpaca-trade-api": "^2.10.1",
+    "axios": "^0.24.0",
+    "dotenv": "^10.0.0",
+    "node-cron": "^2.0.3",
+    "nodemailer": "^6.7.0"
+  }
+}
