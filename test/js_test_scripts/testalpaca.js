@@ -34,3 +34,14 @@ var getBar = async () =>{
 }
 
 getBar();
+
+console.log(alpaca)
+
+var currentdate = new Date(); 
+var datetime = "Check: " + currentdate.getDate() + "/"
+        + (currentdate.getMonth()+1)  + "/" 
+        + currentdate.getFullYear() + " @ "  
+        + currentdate.getHours() + ":"  
+        + currentdate.getMinutes() + ":" 
+        + currentdate.getSeconds();
+console.log(datetime)
