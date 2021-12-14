@@ -1,4 +1,5 @@
 const Alpaca = require('@alpacahq/alpaca-trade-api');
+
 require('dotenv').config();
 
 //process.env.{variable}
@@ -9,7 +10,7 @@ const alpaca = new Alpaca({
     paper: true,
 })
 
-
+/*
 alpaca.getAccount().then((account) => {
     console.log('Current Account:', account)
 })
@@ -33,10 +34,9 @@ var getBar = async () =>{
     }
 }
 
-getBar();
+//getBar();*/
 
-console.log(alpaca)
-
+/*
 var currentdate = new Date(); 
 var datetime = "Check: " + currentdate.getDate() + "/"
         + (currentdate.getMonth()+1)  + "/" 
@@ -45,3 +45,17 @@ var datetime = "Check: " + currentdate.getDate() + "/"
         + currentdate.getMinutes() + ":" 
         + currentdate.getSeconds();
 console.log(datetime)
+*/
+
+
+
+//console.log(websocket)
+
+const socket = alpaca.data_stream_v2;
+socket.onConnect( ()=>{
+    console.log("Connected");
+    socket.subscribeForQuotes(["AAPL"]);
+    socket.subscribeForTrades(["FB"]);
+    socket.subscribeForBars(["SPY"]);
+    socket.subscribeForStatuses(["*"]);
+});
