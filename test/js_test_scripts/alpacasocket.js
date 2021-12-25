@@ -10,29 +10,31 @@ class DataStream {
     });
 
     const socket = this.alpaca.data_stream_v2;
-
     socket.onConnect(function () {
       console.log("15 Connected");
       socket.subscribeForQuotes(["AAPL"]);
+      socket.subscribeForQuotes(["FB"]);
       socket.subscribeForTrades(["FB"]);
       socket.subscribeForBars(["SPY"]);
       socket.subscribeForStatuses(["*"]);
     });
 
     socket.onError((err) => {
-      console.log("23 "+err);
+      console.log(err);
     });
 
     socket.onStockTrade((trade) => {
-      console.log("27 "+trade);
+      console.log("27")
+      console.log(trade);
     });
 
     socket.onStockQuote((quote) => {
-      console.log("31 "+quote);
+      console.log("31")
+      console.log(quote);
     });
 
     socket.onStockBar((bar) => {
-      console.log("35 "+bar);
+      console.log(bar);
     });
 
     socket.onStatuses((s) => {
@@ -40,7 +42,7 @@ class DataStream {
     });
 
     socket.onStateChange((state) => {
-      console.log("43 "+state);
+      console.log(state);
     });
 
     socket.onDisconnect(() => {
@@ -51,7 +53,7 @@ class DataStream {
 
     // unsubscribe from FB after a second
     setTimeout(() => {
-      socket.unsubscribeFromTrades(["FB"]);
+      //socket.unsubscribeFromTrades(["FB"]);
     }, 1000);
   }
 }
