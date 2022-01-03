@@ -16,8 +16,8 @@ from math import sqrt
 import alpaca_trade_api as tradeapi
 
 # MODIFIABLE GLOBAL VARS
-days = 300 # Obtain 300 days worth of data
-stocks = ['AAPL','VOO', 'NVDA', 'AMD', 'VHT']
+days = 70 # Obtain 300 days worth of data
+stocks = ['AAPL','VOO', 'NVDA', 'AMD', 'VHT'] # max is 30 stocks
 #stocks = ['VOO']
 
 # STATIC GLOBAL ENVIRONMENT VARIABLES
