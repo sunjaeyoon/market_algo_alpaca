@@ -16,9 +16,9 @@ from math import sqrt
 import alpaca_trade_api as tradeapi
 
 # MODIFIABLE GLOBAL VARS
-days = 100
-#stock = ['AAPL','VOO']
-stock = ['GOGL']
+days = 300 # Obtain 300 days worth of data
+stocks = ['AAPL','VOO', 'NVDA', 'AMD', 'VHT']
+#stocks = ['VOO']
 
 # STATIC GLOBAL ENVIRONMENT VARIABLES
 load_dotenv()
@@ -84,94 +84,97 @@ account = api.get_account()
 #print('${} is available as buying power.'.format(account.buying_power))
 
 # Get daily price data for AAPL over the last X trading days.
-barset = api.get_barset(stock, 'day', limit=days)
-bars = barset[stock[0]]
-# See how much AAPL moved in that timeframe.
-week_open = bars[0].o
-week_close = bars[-1].c
-percent_change = (week_close - week_open) / week_open * 100
-print('{} moved {}% over the last {} days'.format(stock[0], percent_change,days))
+barset = api.get_barset(stocks, 'day', limit=days)
+for stock in stocks:
+    bars = barset[stock]
+    # See how much AAPL moved in that timeframe.
+    week_open = bars[0].o
+    week_close = bars[-1].c
+    percent_change = (week_close - week_open) / week_open * 100
+    print('{} moved {}% over the last {} days'.format(stock, percent_change,days))
 
-# View Data
-"""
-plt.figure()
-plt.plot([bars[i].o for i in range(len(bars))], label='open')
-plt.plot([bars[i].l for i in range(len(bars))], label='low')
-plt.plot([bars[i].h for i in range(len(bars))], label='high')
-plt.plot([bars[i].c for i in range(len(bars))], label='close')
-plt.title('Open and Close')
-plt.legend()
-plt.savefig('apple_plot.png')
-"""
+    # View Data
+    """
+    plt.figure()
+    plt.plot([bars[i].o for i in range(len(bars))], label='open')
+    plt.plot([bars[i].l for i in range(len(bars))], label='low')
+    plt.plot([bars[i].h for i in range(len(bars))], label='high')
+    plt.plot([bars[i].c for i in range(len(bars))], label='close')
+    plt.title('Open and Close')
+    plt.legend()
+    plt.savefig('apple_plot.png')
+    """
 
-# Reorganize Data into dataframe
-aapl = pd.DataFrame({
-    'Date':   [bars[i].t for i in range(len(bars))],
-    'Volume': [bars[i].v for i in range(len(bars))], 
-    'Open':   [bars[i].o for i in range(len(bars))],
-    'High':   [bars[i].h for i in range(len(bars))],
-    'Low':    [bars[i].l for i in range(len(bars))],
-    'Close':  [bars[i].c for i in range(len(bars))],          
-})
+    # Reorganize Data into dataframe
+    aapl = pd.DataFrame({
+        'Date':   [bars[i].t for i in range(len(bars))],
+        'Volume': [bars[i].v for i in range(len(bars))], 
+        'Open':   [bars[i].o for i in range(len(bars))],
+        'High':   [bars[i].h for i in range(len(bars))],
+        'Low':    [bars[i].l for i in range(len(bars))],
+        'Close':  [bars[i].c for i in range(len(bars))],          
+    })
 
-key = 'Close'
-"""
-plt.figure()
+    key = 'Close'
+    """
+    plt.figure()
 
-aapl[key].plot()
-plt.title(key)
-"""
+    aapl[key].plot()
+    plt.title(key)
+    """
 
-# Moving Average
-for i in range(5,20+1,5):
-    column_name = "MA%s" %(str(i))
-    aapl[column_name] = aapl[key].rolling(window=i,center=False).mean()
-    # Plot rolling
-    #aapl[column_name].plot()
-#plt.legend()
-#plt.savefig(f'{key}.png')
+    # Moving Average
+    for i in range(5,20+1,5):
+        column_name = "MA%s" %(str(i))
+        aapl[column_name] = aapl[key].rolling(window=i,center=False).mean()
+        # Plot rolling
+        #aapl[column_name].plot()
+    #plt.legend()
+    #plt.savefig(f'{key}.png')
 
-# Smooth Function
-month_diff = days//30
-if month_diff == 0:
-    month_diff = 1
-smooth = int(2 * month_diff + 3) # Simple algo to determine smoothness
-pts = savgol_filter(aapl['Close'], smooth, 3) # Get the smoothened price data
+    # Smooth Function
+    month_diff = days//30
+    if month_diff == 0:
+        month_diff = 1
+    smooth = int(2 * month_diff + 3) # Simple algo to determine smoothness
+    pts = savgol_filter(aapl['Close'], smooth, 3) # Get the smoothened price data
 
-"""
-plt.figure()
-plt.title(stock[0])
-plt.xlabel('Days')
-plt.ylabel('Prices')
-plt.plot(pts, label=f'Smooth {stock[0]}')
-plt.legend()
-plt.show()
-plt.savefig(f'{key}.png')
-"""
+    """
+    plt.figure()
+    plt.title(stock)
+    plt.xlabel('Days')
+    plt.ylabel('Prices')
+    plt.plot(pts, label=f'Smooth {stock}')
+    plt.legend()
+    plt.show()
+    plt.savefig(f'{key}.png')
+    """
 
-# Regression
+    # Regression
 
-local_min, local_max = local_min_max(pts)
+    local_min, local_max = local_min_max(pts)
 
-local_min_slope, local_min_int = regression_ceof(local_min)
-local_max_slope, local_max_int = regression_ceof(local_max)
+    local_min_slope, local_min_int = regression_ceof(local_min)
+    local_max_slope, local_max_int = regression_ceof(local_max)
 
-support = (local_min_slope * np.arange(days)) + local_min_int
-resistance = (local_max_slope * np.arange(days)) + local_max_int
+    support = (local_min_slope * np.arange(days)) + local_min_int
+    resistance = (local_max_slope * np.arange(days)) + local_max_int
+    center = (support+resistance)/2
 
-plt.figure()
+    plt.figure()
 
-aapl[key].plot()
-plt.plot(pts, label=f'Smooth {stock[0]}')
-plt.plot(support, label='Support', c='r')
-plt.plot(resistance, label='Resistance', c='g')
-plt.scatter([i[0] for i in local_min],[i[1] for i in local_min] , c='r')
-plt.scatter([i[0] for i in local_max],[i[1] for i in local_max] , c='g')
-plt.title(stock[0])
-plt.xlabel('Days')
-plt.ylabel('Prices')
-plt.legend()
-plt.show()
-plt.savefig('support.png')
+    aapl[key].plot()
+    #plt.plot(pts, label=f'Smooth {stock}')
+    plt.plot(support, label='Support y={0:.2f}x+{1:.2f}'.format(local_min_slope, local_min_int), c='r')
+    plt.plot(resistance, label='Resistance', c='g')
+    plt.plot(center)
+    plt.scatter([i[0] for i in local_min],[i[1] for i in local_min] , c='r')
+    plt.scatter([i[0] for i in local_max],[i[1] for i in local_max] , c='g')
+    plt.title(stock+" " + str(aapl['Date'].iloc[-1]))
+    plt.xlabel('Days')
+    plt.ylabel('Prices')
+    plt.legend()
+    plt.show()
+    plt.savefig(f'{stock}.png')  
 
 # Fibanocci
