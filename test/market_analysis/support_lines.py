@@ -71,6 +71,69 @@ def regression_ceof(pts):
     model.fit(X, y)
     return model.coef_[0], model.intercept_
 
+def regression(aapl):
+    key = 'Close'
+    """
+    plt.figure()
+
+    aapl[key].plot()
+    plt.title(key)
+    """
+
+    # Moving Average
+    for i in range(5,20+1,5):
+        column_name = "MA%s" %(str(i))
+        aapl[column_name] = aapl[key].rolling(window=i,center=False).mean()
+        # Plot rolling
+        #aapl[column_name].plot()
+    #plt.legend()
+    #plt.savefig(f'{key}.png')
+
+    # Smooth Function
+    month_diff = days//30
+    if month_diff == 0:
+        month_diff = 1
+    smooth = int(2 * month_diff + 3) # Simple algo to determine smoothness
+    pts = savgol_filter(aapl['Close'], smooth, 3) # Get the smoothened price data
+
+    """
+    plt.figure()
+    plt.title(stock)
+    plt.xlabel('Days')
+    plt.ylabel('Prices')
+    plt.plot(pts, label=f'Smooth {stock}')
+    plt.legend()
+    plt.show()
+    plt.savefig(f'{key}.png')
+    """
+
+    # Regression
+
+    local_min, local_max = local_min_max(pts)
+
+    local_min_slope, local_min_int = regression_ceof(local_min)
+    local_max_slope, local_max_int = regression_ceof(local_max)
+
+    pad = 50
+    support = (local_min_slope * np.arange(days+pad)) + local_min_int
+    resistance = (local_max_slope * np.arange(days+pad)) + local_max_int
+    center = (support+resistance)/2
+
+    plt.figure()
+
+    aapl[key].plot()
+    #plt.plot(pts, label=f'Smooth {stock}')
+    plt.plot(support, label='Support y={0:.2f}x+{1:.2f}'.format(local_min_slope, local_min_int), c='r')
+    plt.plot(resistance, label='Resistance', c='g')
+    plt.plot(center)
+    plt.scatter([i[0] for i in local_min],[i[1] for i in local_min] , c='r')
+    plt.scatter([i[0] for i in local_max],[i[1] for i in local_max] , c='g')
+    plt.title(stock+" " + str(aapl['Date'].iloc[-1]))
+    plt.xlabel('Days')
+    plt.ylabel('Prices')
+    plt.legend()
+    plt.show()
+    plt.savefig(f'{stock}.png') 
 
 # SCRIPTING
 # Load Account
@@ -115,66 +178,6 @@ for stock in stocks:
         'Close':  [bars[i].c for i in range(len(bars))],          
     })
 
-    key = 'Close'
-    """
-    plt.figure()
-
-    aapl[key].plot()
-    plt.title(key)
-    """
-
-    # Moving Average
-    for i in range(5,20+1,5):
-        column_name = "MA%s" %(str(i))
-        aapl[column_name] = aapl[key].rolling(window=i,center=False).mean()
-        # Plot rolling
-        #aapl[column_name].plot()
-    #plt.legend()
-    #plt.savefig(f'{key}.png')
-
-    # Smooth Function
-    month_diff = days//30
-    if month_diff == 0:
-        month_diff = 1
-    smooth = int(2 * month_diff + 3) # Simple algo to determine smoothness
-    pts = savgol_filter(aapl['Close'], smooth, 3) # Get the smoothened price data
-
-    """
-    plt.figure()
-    plt.title(stock)
-    plt.xlabel('Days')
-    plt.ylabel('Prices')
-    plt.plot(pts, label=f'Smooth {stock}')
-    plt.legend()
-    plt.show()
-    plt.savefig(f'{key}.png')
-    """
-
-    # Regression
-
-    local_min, local_max = local_min_max(pts)
-
-    local_min_slope, local_min_int = regression_ceof(local_min)
-    local_max_slope, local_max_int = regression_ceof(local_max)
-
-    support = (local_min_slope * np.arange(days)) + local_min_int
-    resistance = (local_max_slope * np.arange(days)) + local_max_int
-    center = (support+resistance)/2
-
-    plt.figure()
-
-    aapl[key].plot()
-    #plt.plot(pts, label=f'Smooth {stock}')
-    plt.plot(support, label='Support y={0:.2f}x+{1:.2f}'.format(local_min_slope, local_min_int), c='r')
-    plt.plot(resistance, label='Resistance', c='g')
-    plt.plot(center)
-    plt.scatter([i[0] for i in local_min],[i[1] for i in local_min] , c='r')
-    plt.scatter([i[0] for i in local_max],[i[1] for i in local_max] , c='g')
-    plt.title(stock+" " + str(aapl['Date'].iloc[-1]))
-    plt.xlabel('Days')
-    plt.ylabel('Prices')
-    plt.legend()
-    plt.show()
-    plt.savefig(f'{stock}.png')  
+    regression(aapl)
 
 # Fibanocci
