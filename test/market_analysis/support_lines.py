@@ -16,7 +16,7 @@ from math import sqrt
 import alpaca_trade_api as tradeapi
 
 # MODIFIABLE GLOBAL VARS
-days = 70 # Obtain 300 days worth of data
+days = 300 # Obtain 300 days worth of data
 stocks = ['AAPL','VOO', 'NVDA', 'AMD', 'VHT'] # max is 30 stocks
 #stocks = ['VOO']
 
@@ -80,7 +80,9 @@ def regression(aapl):
     plt.title(key)
     """
 
+
     # Moving Average
+    """
     for i in range(5,20+1,5):
         column_name = "MA%s" %(str(i))
         aapl[column_name] = aapl[key].rolling(window=i,center=False).mean()
@@ -88,7 +90,7 @@ def regression(aapl):
         #aapl[column_name].plot()
     #plt.legend()
     #plt.savefig(f'{key}.png')
-
+    """
     # Smooth Function
     month_diff = days//30
     if month_diff == 0:
@@ -179,5 +181,6 @@ for stock in stocks:
     })
 
     regression(aapl)
+    #aapl.to_csv(f'{stock}.csv')
 
 # Fibanocci
